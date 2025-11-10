@@ -20,6 +20,15 @@ const Doctors = () => {
 
   const doctors = [
     {
+      name: "Dr. Johnny Seance",
+      specialty: "neurology",
+      specialtyLabel: "Neurologist",
+      qualification: "MD, PhD - 22 years experience",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop",
+      available: true,
+      schedule: "Tue-Sat, 9:00 AM - 6:00 PM",
+    },
+    {
       name: "Dr. Sarah Johnson",
       specialty: "cardiology",
       specialtyLabel: "Cardiologist",

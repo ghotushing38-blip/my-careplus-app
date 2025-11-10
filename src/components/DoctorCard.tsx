@@ -1,5 +1,9 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import { Calendar, Clock } from "lucide-react";
+import BookingModal from "./BookingModal";
 
 interface DoctorCardProps {
   name: string;
@@ -11,6 +15,17 @@ interface DoctorCardProps {
 }
 
 const DoctorCard = ({ name, specialty, qualification, image, available, schedule }: DoctorCardProps) => {
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleBooking = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+    setBookingOpen(true);
+  };
   return (
     <div className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 animate-fadeInUp">
       {/* Doctor Image */}
@@ -38,11 +53,18 @@ const DoctorCard = ({ name, specialty, qualification, image, available, schedule
           </div>
         )}
 
-        <Button className="w-full" size="sm">
+        <Button className="w-full" size="sm" onClick={handleBooking} disabled={!available}>
           <Calendar className="h-4 w-4" />
-          Book Appointment
+          {available ? "Book Appointment" : "Unavailable"}
         </Button>
       </div>
+
+      <BookingModal 
+        open={bookingOpen} 
+        onOpenChange={setBookingOpen}
+        doctorName={name}
+        doctorSpecialty={specialty}
+      />
     </div>
   );
 };

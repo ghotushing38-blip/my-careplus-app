@@ -1,10 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { Phone, MessageCircle, Calendar, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Phone, MessageCircle, Calendar, Menu, X, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -14,7 +29,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -73,6 +88,16 @@ const Header = () => {
                 Book Now
               </Link>
             </Button>
+            {isLoggedIn ? (
+              <Button variant="outline" size="sm" onClick={() => navigate("/profile")}>
+                <User className="h-4 w-4" />
+                Profile
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                Login
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -118,6 +143,16 @@ const Header = () => {
                   Book Appointment
                 </Link>
               </Button>
+              {isLoggedIn ? (
+                <Button variant="outline" size="sm" onClick={() => { navigate("/profile"); setMobileMenuOpen(false); }}>
+                  <User className="h-4 w-4" />
+                  Profile
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => { navigate("/auth"); setMobileMenuOpen(false); }}>
+                  Login
+                </Button>
+              )}
             </div>
           </div>
         )}
