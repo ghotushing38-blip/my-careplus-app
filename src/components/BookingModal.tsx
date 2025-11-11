@@ -15,9 +15,41 @@ interface BookingModalProps {
   onOpenChange: (open: boolean) => void;
   doctorName: string;
   doctorSpecialty: string;
+  schedule?: string;
 }
 
-const BookingModal = ({ open, onOpenChange, doctorName, doctorSpecialty }: BookingModalProps) => {
+const BookingModal = ({ open, onOpenChange, doctorName, doctorSpecialty, schedule }: BookingModalProps) => {
+  // Parse schedule to get available days
+  const getAvailableDays = () => {
+    if (!schedule) return [1, 2, 3, 4, 5]; // Default to Mon-Fri
+    
+    const dayMap: Record<string, number> = {
+      'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6, 'sun': 0
+    };
+    
+    const scheduleLower = schedule.toLowerCase();
+    const availableDays: number[] = [];
+    
+    if (scheduleLower.includes('mon-fri')) {
+      return [1, 2, 3, 4, 5];
+    } else if (scheduleLower.includes('tue-sat')) {
+      return [2, 3, 4, 5, 6];
+    } else if (scheduleLower.includes('mon-sat')) {
+      return [1, 2, 3, 4, 5, 6];
+    } else if (scheduleLower.includes('wed-sun')) {
+      return [3, 4, 5, 6, 0];
+    } else if (scheduleLower.includes('mon-thu')) {
+      return [1, 2, 3, 4];
+    }
+    
+    Object.entries(dayMap).forEach(([day, num]) => {
+      if (scheduleLower.includes(day)) availableDays.push(num);
+    });
+    
+    return availableDays.length > 0 ? availableDays : [1, 2, 3, 4, 5];
+  };
+
+  const availableDays = getAvailableDays();
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("");
   const [reason, setReason] = useState("");
@@ -103,7 +135,11 @@ const BookingModal = ({ open, onOpenChange, doctorName, doctorSpecialty }: Booki
               mode="single"
               selected={date}
               onSelect={setDate}
-              disabled={(date) => date < new Date() || date.getDay() === 0}
+              disabled={(date) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return date < today || !availableDays.includes(date.getDay());
+              }}
               className="rounded-md border"
             />
           </div>

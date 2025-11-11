@@ -64,6 +64,7 @@ const DoctorCard = ({ name, specialty, qualification, image, available, schedule
         onOpenChange={setBookingOpen}
         doctorName={name}
         doctorSpecialty={specialty}
+        schedule={schedule}
       />
     </div>
   );
